@@ -135,7 +135,7 @@ def main():
             ret, frame = video.read()
             detected_tags = []
             if ret:
-                detected_tags = getTagCenter(getTag(frame))
+                detected_tags = getTagCenter(getTag(frame, at_detector, camera_params))
             else:  
                 continue
             # if not detected_tags:
@@ -146,10 +146,12 @@ def main():
             if len(detected_tags) != 0:
                 tagX, tagY = detected_tags[0]
                 print(detected_tags)
+                print(middle_x - tagX)
+                print(middle_y - tagY)
 
                 # Calculate percent error from the desired middle coordinates
-                error_y = round((middle_y - tagY)/height * 100, 6)
-                error_x = round((middle_x - tagX)/width * 100, 6)
+                error_x = round((middle_y - tagY)/height * 100, 6)
+                error_y = round((middle_x - tagX)/width * 100, 6)
 
                 print("Frame:", x)
                 print(f"Error X: {error_x}%")
@@ -180,5 +182,5 @@ if __name__ == "__main__":
     camera_params, at_detector = detectTags()
     # vida = cv2.VideoCapture('AprilTagTest.mkv')
     # tagVideo(vida)
-    # main()
+    main()
     

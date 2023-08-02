@@ -58,7 +58,7 @@ class BlueROV:
             value = np.clip(value, -100, 100)
 
         pwm_value = 1500 + value * 4
-        self.set_rc_channel(5, pwm_value)
+        self.set_rc_channel(4, pwm_value)
 
     def set_lateral_power(self, value):
         """Set the lateral power channel"""
@@ -78,7 +78,7 @@ class BlueROV:
             value = np.clip(value, -100, 100)
 
         pwm_value = 1500 + value * 4
-        self.set_rc_channel(4, pwm_value)
+        self.set_rc_channel(3, pwm_value)
 
     def set_yaw_rate_power(self, value):
         """Set the yaw rate power channel"""
@@ -88,4 +88,4 @@ class BlueROV:
             value = np.clip(value, -100, 100)
 
         pwm_value = 1500 + value * 4
-        self.set_rc_channel(3, pwm_value)
+        self.set_rc_channel(2, pwm_value)

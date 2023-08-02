@@ -13,8 +13,8 @@ camera_params, at_detector = detectTags()
 # Create the video object
 video = Video()
 # Create the PID object
-pid_vertical = PID(K_p=5, K_i=0.0, K_d=-0.7, integral_limit=1)
-pid_horizontal = PID(K_p=5, K_i=0.0, K_d=-0.7, integral_limit=1)
+pid_vertical = PID(K_p=1, K_i=0.0, K_d=-0.7, integral_limit=1)
+pid_horizontal = PID(K_p=2, K_i=0.0, K_d=-0.7, integral_limit=1)
 # Create the mavlink connection
 mav_comn = mavutil.mavlink_connection("udpin:0.0.0.0:14550")
 # Create the BlueROV object
@@ -29,6 +29,7 @@ lateral_power = 0
 
 
 def _get_frame():
+    global vertical_power, lateral_power
     global frame
     while not video.frame_available():
         print("Waiting for frame...")
@@ -53,22 +54,14 @@ def _get_frame():
                     print(f"Error X: {error_x}%")
                     print(f"Error Y: {error_y}%")
 
+                    # TODO: set vertical_power and lateral_power here
                     # Update the PID controllers and get the output
-                    vertical_power = pid_vertical.update(error_y)
-                    lateral_power = pid_horizontal.update(error_x)
+                    vertical_power = int(pid_vertical.update(error_y))
+                    lateral_power = int(pid_horizontal.update(error_x))
 
                     print("Output X:", lateral_power)
                     print("Output Y:", vertical_power)
 
-                    if vertical_power < -100 or vertical_power > 100:
-                        print("Vertical power value out of range. Clipping...")
-                        vertical_power = clip(vertical_power, -100, 100)
-                        vertical_power = int(vertical_power)
-
-                    if lateral_power < -100 or lateral_power > 100:
-                        print("Lateral power value out of range. Clipping...")
-                        lateral_power = clip(lateral_power, -100, 100)
-                        lateral_power = int(lateral_power)
                 else:
                     vertical_power = 0
                     lateral_power = 0
@@ -77,10 +70,7 @@ def _get_frame():
 
 
 
-                # TODO: set vertical_power and lateral_power here
-
-
-
+                
 
                 print(frame.shape)
     except KeyboardInterrupt:
@@ -88,12 +78,12 @@ def _get_frame():
 
 
 def _send_rc():
+    global vertical_power, lateral_power
     while True:
-        mav_comn.wait_heartbeat()
-        # bluerov.arm()
-        bluerov.set_vertical_power(vertical_power)
-        bluerov.set_lateral_power(lateral_power)
-
+        # mav_comn.wait_heartbeat()
+        bluerov.arm()
+        # bluerov.set_vertical_power(int(vertical_power))
+        bluerov.set_lateral_power(-int(lateral_power))
 
 # Start the video thread
 video_thread = Thread(target=_get_frame)
