@@ -19,7 +19,7 @@ def detectTags():
                             debug=0)
     return camera_params, at_detector
 
-def getTag(frame):
+def getTag(frame, at_detector, camera_params):
     # video.set(cv2.CAP_PROP_POS_FRAMES, frameNumber)
 
     img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -180,5 +180,5 @@ if __name__ == "__main__":
     camera_params, at_detector = detectTags()
     # vida = cv2.VideoCapture('AprilTagTest.mkv')
     # tagVideo(vida)
-    main()
+    # main()
     
