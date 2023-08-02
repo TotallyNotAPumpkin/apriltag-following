@@ -5,9 +5,10 @@ from pid import PID
 from video import Video
 from bluerov_interface import BlueROV
 from pymavlink import mavutil
+from numpy import clip
 
 # TODO: import your processing functions
-
+from apriltags import getTag, getTagCenter, sizeF
 
 # Create the video object
 video = Video()
@@ -38,7 +39,43 @@ def _get_frame():
             if video.frame_available():
                 frame = video.frame()
                 # TODO: Add frame processing here
+                
+                middle_x, middle_y, width, height = sizeF(frame)
+                detected_tags = getTagCenter(getTag(frame))
+                if len(detected_tags) != 0:
+                    tagX, tagY = detected_tags[0]
+                    print(detected_tags)
+
+                    # Calculate percent error from the desired middle coordinates
+                    error_y = round((middle_y - tagY)/height * 100, 6)
+                    error_x = round((middle_x - tagX)/width * 100, 6)
+
+                    print(f"Error X: {error_x}%")
+                    print(f"Error Y: {error_y}%")
+                else:
+                    print("Error Y: No tag detected.")
+                    print("Error X: No tag detected.")
+
+                # Update the PID controllers and get the output
+                vertical_power = PID.update(error_y)
+                lateral_power = PID.update(error_x)
+
+                print("Output X:", lateral_power)
+                print("Output Y:", vertical_power)
+
                 # TODO: set vertical_power and lateral_power here
+
+
+                if vertical_power < -100 or vertical_power > 100:
+                    print("Vertical power value out of range. Clipping...")
+                    vertical_power = clip(vertical_power, -100, 100)
+                    vertical_power = int(vertical_power)
+
+                if lateral_power < -100 or lateral_power > 100:
+                    print("Lateral power value out of range. Clipping...")
+                    lateral_power = clip(lateral_power, -100, 100)
+                    lateral_power = int(lateral_power)
+
                 print(frame.shape)
     except KeyboardInterrupt:
         return
